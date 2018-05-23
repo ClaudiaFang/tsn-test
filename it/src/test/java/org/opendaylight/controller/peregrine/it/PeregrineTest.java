@@ -33,8 +33,8 @@ public class PeregrineTest extends AbstractMdsalTestBase {
     @Override
     public MavenUrlReference getFeatureRepo() {
         return maven()
-                .groupId("org.opendaylight.controller.peregrine")
-                .artifactId("features-peregrine")
+                .groupId("org.opendaylight.controller.moxa-aggregator")
+                .artifactId("features-tsn-test")
                 .classifier("features")
                 .type("xml")
                 .versionAsInProject();
@@ -42,7 +42,7 @@ public class PeregrineTest extends AbstractMdsalTestBase {
 
     @Override
     public String getFeatureName() {
-        return "odl-peregrine";
+        return "odl-tsn-test";
     }
 
     @Override
