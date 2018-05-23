@@ -1,0 +1,45 @@
+module edge {
+    yang-version 1.1;
+    namespace "urn:opendaylight:peregrine:edge";
+    prefix "edge";
+
+    revision "2018-04-01" { // TODO change revision to date of model creation
+        description "Initial revision of peregrine model";
+    }
+
+    grouping groupCapacity{
+
+        leaf capacity_value {
+            type uint32;
+        }
+
+        leaf capacity_desc {
+            type string;
+        }
+
+    }
+
+    grouping groupEdge {
+
+        leaf headMAC {
+            type string;
+        }
+
+        leaf tailMAC {
+            type string;
+        }
+
+        leaf headPort {
+            type string;
+        }
+
+        leaf tailPort {
+            type string;
+        }
+
+        container capacity {
+            uses groupCapacity;
+        }
+
+    }
+}

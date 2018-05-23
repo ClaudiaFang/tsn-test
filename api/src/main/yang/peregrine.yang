@@ -1,0 +1,49 @@
+module peregrine {
+    yang-version 1.1;
+    namespace "urn:opendaylight:peregrine";
+    prefix "dte";
+
+    revision "2018-04-01" { // TODO change revision to date of model creation
+        description "Initial revision of peregrine model";
+    }
+
+    import ieee802-dot1q-cc-base {
+        prefix base;
+    }
+
+    import ieee802-dot1q-cc-listener {
+        prefix listener;
+    }
+
+    import ieee802-dot1q-cc-talker {
+        prefix talker;
+    }
+
+    import ieee802-dot1q-cc-status {
+        prefix status;
+    }
+
+    rpc addAllTalkers {
+        input {
+            list talkers {
+                uses talker:GroupTalker;
+            }
+        }
+    }
+
+    rpc addAllListeners {
+        input {
+            list listeners {
+                    uses listener:GroupListener;
+            }
+        }
+    }
+
+    rpc getStreamStatus {
+        output {
+            list status {
+                uses status:GroupStatus;
+            }
+        }
+    }
+}

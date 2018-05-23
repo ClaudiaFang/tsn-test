@@ -1,0 +1,61 @@
+module switch {
+    yang-version 1.1;
+    namespace "urn:opendaylight:peregrine:switch";
+    prefix "switch";
+
+    revision "2018-04-01" { // TODO change revision to date of model creation
+        description "Initial revision of peregrine model";
+    }
+
+    grouping groupSwitch {
+
+        leaf name {
+            type string;
+        }
+
+        leaf mac {
+            type string;
+        }
+
+        container tsn-domain {
+
+            leaf id {
+                type string;
+            }
+
+            leaf as-priority {
+                type uint8;
+            }
+        }
+
+        leaf community {
+            type string;
+        }
+
+        leaf netconf-username {
+            type string;
+        }
+
+        leaf netconf-password {
+            type string;
+        }
+
+        leaf model {
+            type string;
+        }
+
+        leaf role {
+            type enumeration {
+              enum none {
+                value 0;
+              }
+              enum core {
+                value 1;
+              }
+              enum edge {
+                value 2;
+              }
+            }
+        }
+    }
+}

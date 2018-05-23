@@ -1,0 +1,648 @@
+module ieee802-dot1q-cc-status {
+
+  namespace "urn:ieee:std:802.1Q:yang:ieee802-dot1q-cc-status";
+  prefix "dot1q-cc-status";
+
+  import ietf-inet-types { prefix "inet"; }
+
+  import ieee802-dot1q-cc-base { prefix "base"; }
+
+  organization
+    "Institute of Electrical and Electronics Engineers";
+
+  contact
+    "WG-URL: http://grouper.ieee.org/groups/802/1/
+    WG-EMail: stds-802-1@ieee.org
+    Contact: IEEE 802.1 Working Group Chair
+    Postal: C/O IEEE 802.1 Working Group
+            IEEE Standards Association
+            445 Hoes Lane
+            P.O. Box 1331
+            Piscataway
+            NJ 08855-1331
+            USA
+
+    E-mail: STDS-802-1-L@LISTSERV.IEEE.ORG";
+
+  description
+    "Common typedefs and groupings for TSN user/network configuration
+    in IEEE Std 802.1Q.";
+
+  revision 2018-02-15 {
+    description
+      "Initial revision specified in 46.3 of IEEE Std 802.1Qcc-2018,
+      Amendment: Stream Reservation Protocol (SRP) Enhancements
+      and Performance Improvements.";
+    reference
+      "46.3 of IEEE Std 802.1Qcc-2018";
+  }
+
+  grouping groupIEEE802-MacAddresses {
+      description
+          "This YANG grouping specifies the pair of
+          IEEE 802 MAC addresses for Stream identification.
+          The use of these fields for Stream identification
+          corresponds to the managed objects for
+          Stream identification in IEEE Std 802.1CB.
+
+          If inconsistency arises between this specification
+          and IEEE Std 802.1CB, IEEE Std 802.1CB takes
+          precedence.";
+
+      leaf DestinationMacAddress {
+          type string {
+            pattern '[0-9a-fA-F]{2}(-[0-9a-fA-F]{2}){5}';
+          }
+          description
+              "Destination MAC address
+
+              An address of all 1 specifies that
+              the destination MAC address is ignored for
+              purposes of Stream identification.
+
+              The string uses the hexadecimal representation
+              specified in IEEE Std 802 (i.e. canonical format).";
+      }
+      leaf SourceMacAddress {
+          type string {
+                pattern '[0-9a-fA-F]{2}(-[0-9a-fA-F]{2}){5}';
+          }
+          description
+              "Source MAC address
+
+              An address of all 1 specifies that
+              the source MAC address is ignored for
+              purposes of Stream identification.
+
+              The string uses the hexadecimal representation
+              specified in IEEE Std 802 (i.e. canonical format).";
+      }
+  }
+
+  grouping groupIEEE802-VlanTag {
+      description
+          "This YANG grouping specifies a
+          customer VLAN Tag (C-TAG of clause 9)
+          for Stream identification.
+          The Drop Eligible Indicator (DEI) field is
+          not relevant from the perspective of a
+          TSN Talker/Listener.
+
+          The use of these fields for Stream identification
+          corresponds to the managed objects for
+          Stream identification in IEEE Std 802.1CB.
+
+          If inconsistency arises between this specification
+          and IEEE Std 802.1CB, IEEE Std 802.1CB takes
+          precedence.";
+
+          leaf PriorityCodePoint {
+              type uint8 {
+                range "0 .. 7"; // 3 bits
+              }
+              description
+              "Priority Code Point (PCP) field.
+              The PriorityCodePoint is not used to
+              identify the Stream, but it does
+              identify a traffic class (queue) in
+              Bridges.";
+          }
+          leaf VlanId {
+              type uint16 {
+                range "0 .. 4095"; // 12 bits
+              }
+              description
+                  "VLAN ID (VID) field.
+                  If only the PriorityCodePoint is known,
+                  the VlanId is specified as 0.";
+          }
+      }
+
+  grouping groupIPv4-tuple {
+      description
+          "This YANG grouping specifies parameters
+          to identify an IPv4 (RFC791) Stream.
+
+          The use of these fields for Stream identification
+          corresponds to the managed objects for
+          Stream identification in IEEE Std 802.1CB.
+          If inconsistency arises between this specification
+          and IEEE Std 802.1CB, IEEE Std 802.1CB takes
+          precedence.";
+
+      leaf SourceIpAddress {
+          type inet:ipv4-address;
+          description
+              "Source IPv4 address.
+
+              An address of all 0 specifies that
+              the IP source address is ignored for
+              purposes of Stream identification.";
+      }
+      leaf DestinationIpAddress {
+          type inet:ipv4-address;
+          description
+              "Destination IPv4 address.";
+      }
+      leaf Dscp {
+          type uint8;
+          description
+              "Differentiated services code
+              point, DSCP (RFC2474).
+
+              A value of 64 decimal specifies that
+              the DSCP is ignored for
+              purposes of Stream identification.";
+      }
+      leaf Protocol {
+          type uint16;
+          description
+              "IPv4 Protocol (e.g. UDP).
+              The special value of all 1’s (FFFF hex)
+              represents ’None’, meaning that
+              Protocol, SourcePort, and
+              DestinationPort are ignored for
+              purposes of Stream identification.
+
+              For any value other than all 1’s, the
+              lower octet is used to match IPv4 Protocol.";
+      }
+      leaf SourcePort {
+          type uint16;
+          description
+            "This matches the source port of the Protocol.";
+      }
+      leaf DestinationPort {
+          type uint16;
+          description
+             "This matches the destination port of the Protocol.";
+      }
+  }
+
+  grouping groupIPv6-tuple {
+      description
+            "This YANG grouping specifies parameters
+            to identify an IPv6 (RFC2460) Stream.
+
+            The use of these fields for Stream identification
+            corresponds to the managed objects for
+            Stream identification in IEEE Std 802.1CB.
+
+            If inconsistency arises between this specification
+            and IEEE Std 802.1CB, IEEE Std 802.1CB takes
+            precedence.";
+      leaf SourceIpAddress {
+          type inet:ipv6-address;
+          description
+              "Source IPv6 address.
+
+              An address of all 0 specifies that
+              the IP source address is ignored for
+              purposes of Stream identification.";
+      }
+      leaf DestinationIpAddress {
+          type inet:ipv6-address;
+          description
+            "Destination IPv6 address.";
+      }
+      leaf Dscp {
+          type uint8;
+          description
+              "Differentiated services code
+              point, DSCP (RFC2474).
+
+              A value of 64 decimal specifies that
+              the DSCP is ignored for
+              purposes of Stream identification.";
+      }
+      leaf Protocol {
+          type uint16;
+          description
+              "IPv6 Next Header (e.g. UDP).
+              The special value of all 1’s (FFFF hex)
+              represents ’None’, meaning that
+              Protocol, SourcePort, and
+              DestinationPort are ignored for
+              purposes of Stream identification.
+
+              For any value other than all 1’s, the
+              lower octet is used to match IPv6 Next Header.";
+      }
+      leaf SourcePort {
+          type uint16;
+          description
+            "This matches the source port of the Protocol.";
+      }
+      leaf DestinationPort {
+          type uint16;
+          description
+            "This matches the destination port of the Protocol.";
+      }
+  }
+
+  grouping groupInterfaceConfiguration {
+    description
+        "This YANG grouping provides configuration of
+        interfaces in the Talker/Listener. This configuration
+        assists the network in meeting the stream’s requirements.
+        The InterfaceConfiguration meets the capabilities of
+        the interface as provided in the InterfaceCapabilities
+        group.
+
+        The YANG grouping can be distinct for each Talker
+        or Listener of each Stream.";
+
+    list InterfaceList {
+        key "MacAddress";
+        description
+            "A distinct configuration is provided for
+            each interface in the Talker/Listener (even if
+            multiple interfaces use the same configuration).
+
+            Each element in this InterfaceList consists
+            of an interface identification, followed by a
+            list of configuration values for that interface.
+            If the InterfaceConfiguration group is
+            not provided within the Status group,
+            the network shall assume zero elements
+            as the default (no interface configuration).";
+
+        leaf MacAddress {
+            type string {
+                pattern '[0-9a-fA-F]{2}(-[0-9a-fA-F]{2}){5}';
+            }
+            description
+                "Identification of the interface
+                to be configured in the end station.
+                This MacAddress shall match one of
+                the MacAddress elements of the
+                Talker/Listener EndStationInterfaces group.
+
+                The string uses the hexadecimal representation
+                specified in IEEE Std 802
+                (i.e. canonical format).";
+        }
+
+        list ConfigList {
+            key "Index";
+            description
+                "List of configuration values for
+                the interface.";
+
+            leaf Index {
+                type uint8;
+                description
+                    "This index is provided in order to
+                    provide a unique key per list entry.
+                    The value of Index for each entry
+                    shall be unique (but not necessarily
+                    contiguous).";
+            }
+            choice ConfigValue {
+                description
+                    "One of the following choices is
+                    provided for each configuration value.
+                    Each container name acts as the case name
+                    for the choice.";
+
+                container IEEE802-VlanTag {
+                    description
+                        "Customer VLAN Tag (C-TAG of clause 9)
+                        that applies to the network side of
+                        the user/network boundary. On the user
+                        side, the VLAN tag corresponds to the
+                        IEEE802-VlanTag of DataFrameSpecification
+                        (including untagged if this field is
+                        not provided).
+
+                        If the user provides a VLAN ID in the
+                        IEEE802-VlanTag of DataFrameSpecification,
+                        the stream’s data frames are assumed to
+                        to limited to the active topology for
+                        that VLAN ID. Therefore, if the network
+                        uses a different VLAN ID in
+                        this ConfigValue, the network shall ensure
+                        that the replacement VLAN ID is limited
+                        to the equivalent active topology.
+
+                        This configuration value is not provided
+                        unless VlanTagCapable of
+                        InterfaceCapabilities is true.";
+
+                    uses groupIEEE802-VlanTag;
+                }
+                container IEEE802-MacAddresses {
+                    description
+                        "Source and destination MAC addresses
+                        that apply to the network side of
+                        the user/network boundary. On the user
+                        side, the MAC addresses correspond to the
+                        IEEE802-MacAddresses
+                        of DataFrameSpecification.
+
+                        NOTE - The source MAC address of the
+                        network is typically the same as the
+                        user. The destination MAC address can
+                        be different. For example, the user
+                        can use an individual address, but
+                        the network can use a group (multicast)
+                        address.
+
+                        This configuration value is not provided
+                        unless IEEE Std 802.1CB is supported, and
+                        a value for Active Destination MAC
+                        and VLAN Stream identification
+                        is provided in CB-StreamIdenTypeList
+                        of InterfaceCapabilities.";
+
+                    uses groupIEEE802-MacAddresses;
+                }
+                container IPv4-tuple {
+                    description
+                        "IPv4 identification that applies to the
+                        network side of the user/network
+                        boundary. DataFrameSpecification
+                        applies to the user side.
+
+                        This configuration value is not provided
+                        unless IEEE Std 802.1CB is supported,
+                        and a value for IP Stream identification
+                        is provided in CB-StreamIdenTypeList
+                        of InterfaceCapabilities.";
+
+                    uses groupIPv4-tuple;
+                }
+                container IPv6-tuple {
+                    description
+                        "IPv6 identification that applies to the
+                        network side of the user/network
+                        boundary. DataFrameSpecification
+                        applies to the user side.
+
+                        This configuration value is not provided
+                        unless IEEE Std 802.1CB is supported,
+                        and a value for IP Stream identification
+                        is provided in CB-StreamIdenTypeList
+                        of InterfaceCapabilities.";
+
+                    uses groupIPv6-tuple;
+                }
+                leaf TimeAwareOffset {
+                    type uint32;
+                    description
+                        "If the TimeAware container
+                        is present in the
+                        TrafficSpecification of the Talker
+                        this ConfigValue shall be provided
+                        by the network to the Talker.
+
+                        If the TimeAware container
+                        is not present in the
+                        TrafficSpecification of the Talker,
+                        this ConfigValue shall not
+                        be provided by the network.
+
+                        This ConfigValue shall not
+                        be provided to Listeners, as it is
+                        not applicable.
+
+                        TimeAwareOffset specifies
+                        the offset that the Talker
+                        shall use for transmit.
+                        The network returns a value between
+                        EarliestTransmitOffset
+                        and LatestTransmitOffset of the
+                        Talker’s TrafficSpecification.
+                        The value is expressed as
+                        nanoseconds after the start
+                        of the Talker’s Interval.";
+                }
+            }
+        }
+    }
+  }
+
+
+  grouping GroupStatus {
+    description
+      "This YANG grouping provides the status of a Stream’s
+      configuration from the network to each user. The status
+      in this grouping applies to the entire Stream (Talker
+      and all Listeners).
+
+      In the fully centralized model of TSN configuration,
+      this grouping originates from the CNC, and
+      is delivered to the CUC.
+
+      The group-status-stream and group-status-talker-listener
+      groupings are intended to be used by other modules
+      within a list of status (state) for each Stream,
+      with each list entry using:
+      - leaf of type stream-id-type, used as key to the list
+      - container using group-status-stream
+      - container for Talker, using group-status-talker-listener
+      - list for Listeners, using group-status-talker-listener";
+    reference
+      "46.2.5 of IEEE Std 802.1Qcc-2018";
+
+    container StreamID {
+        description
+        "StreamID specifies a unique identifier
+        of the stream’s configuration, used by protocols in the
+        network to associate the user’s stream with
+        TSN resources.";
+        uses base:groupStreamID;
+    }
+
+    container StatusInfo {
+      description
+        "status-info provides information regarding the status
+        of a Stream’s configuration in the network.";
+      reference
+        "46.2.5.1 of IEEE Std 802.1Qcc-2018";
+      leaf talker-status {
+        type enumeration {
+          enum none {
+            value 0;
+            description "No Talker detected.";
+          }
+          enum ready {
+            value 1;
+            description "Talker ready (configured).";
+          }
+          enum failed {
+            value 2;
+            description "Talker failed.";
+          }
+        }
+        description
+          "This is an enumeration for the status of
+          the Stream’s Talker.";
+        reference
+          "46.2.5.1.1 of IEEE Std 802.1Qcc-2018";
+      }
+      leaf listener-status {
+        type enumeration {
+          enum none {
+            value 0;
+            description "No Listener detected.";
+          }
+          enum ready {
+            value 1;
+            description "All Listeners ready (configured).";
+          }
+          enum partial-failed {
+            value 2;
+            description
+              "One or more Listeners ready, and
+              one or more Listeners failed.
+              If Talker is ready, Stream can be used.";
+          }
+          enum failed {
+            value 3;
+            description "All Listeners failed";
+          }
+        }
+        description
+          "This is an enumeration for the status of
+          the Stream’s Listener(s).";
+
+        reference
+          "46.2.5.1.2 of IEEE Std 802.1Qcc-2018";
+      }
+      leaf failure-code {
+        type uint8;
+        description
+          "If the Stream encounters a failure (talker-status
+          is failed, or listener-status is failed, or
+          listener-status is partial-failed), failure-code
+          provides a non-zero code that specifies the
+          problem. Table 46-1 of IEEE Std 802.1Q-2018
+          describes each code.)";
+
+        reference
+          "46.2.5.1.3 of IEEE Std 802.1Qcc-2018";
+      }
+    }
+
+    container AccumulatedLatency {
+        description
+            "AccumulatedLatency provides the worst-case latency
+            that a single frame of the Stream
+            can encounter along its current path(s).
+
+            When provided to a Listener, AccumulatedLatency is the
+            worst-case latency for that Listener only.
+
+            When provided to a Talker, AccumulatedLatency is the
+            worst-case latency for all Listeners (worst path).
+
+            AccumulatedLatency is specified as an integer number
+            of nanoseconds.
+
+            AccumulatedLatency uses the same definition
+            for latency as MaxLatency (46.2.2.6).
+            For a successful Status, the network
+            returns a value less than or equal to
+            UserToNetworkRequirements.MaxLatency.
+
+            If the TimeAware container is present in
+            the TrafficSpecification of the Talker,
+            the value is expressed as nanoseconds after the
+            start of the Talker’s Interval.
+
+            If the TimeAware container is not present in
+            the TrafficSpecification of the Talker,
+            the value is expressed as nanoseconds after the
+            Talker’s transmit of any frame in the Stream,
+            at any arbitrary time.
+
+            If UserToNetworkRequirements.NumSeamlessTrees is one,
+            AccumulatedLatency shall provide the worst latency
+            for the current path from Talker to each Listener.
+            If the path is changed (e.g. by a spanning tree protocol),
+            AccumulatedLatency changes accordingly.
+
+            If UserToNetworkRequirements.NumSeamlessTrees
+            is greater than one, AccumulatedLatency shall
+            provide the worst latency for all paths in use
+            from the Talker to each Listener.
+
+            AccumulatedLatency can be distinct for each Talker
+            or Listener of each Stream.";
+
+        leaf AL {
+            type uint32;
+            description "AccumulatedLatency value";
+        }
+    }
+
+    container InterfaceConfiguration {
+        description
+            "InterfaceConfiguration provides configuration of
+            interfaces in the Talker/Listener. This configuration
+            assists the network in meeting the stream’s requirements.
+            The InterfaceConfiguration meets the capabilities of
+            the interface as provided in the InterfaceCapabilities
+            group.
+
+            InterfaceConfiguration can be distinct for each Talker
+            or Listener of each Stream.";
+
+        uses groupInterfaceConfiguration;
+    }
+
+    list FailedInterfaces {
+        key "MacAddress";
+            description
+                "When a failure occurs in network configuration
+                (i.e. non-zero FailureCode in StatusInfo group),
+                FailedInterfaces provides a list of one or more
+                physical interfaces (Ports) in the failed
+                station. Each identifier is sufficient
+                to locate the interfaces in the physical topology.
+
+                The FailedInterfaces group is optional.";
+
+            leaf MacAddress {
+                type string {
+                    pattern '[0-9a-fA-F]{2}(-[0-9a-fA-F]{2}){5}';
+                }
+                description
+                "This is the universal individual (unicast)
+                MAC address of the Bridge (8.13.8) or end station.
+                This MAC address is persistent, and uniquely
+                identifies the Bridge within the local network.
+                This MAC address can be discovered in the physical
+                topology using protocols such as IEEE Std 802.1AB
+                (LLDP).
+
+                The string uses the hexadecimal representation
+                specified in IEEE Std 802 (i.e. canonical format).";
+            }
+            leaf InterfaceName {
+                type string;
+                description
+                    "This is the name of the interface (Port)
+                    within the station (Bridge or end station).
+                    This interface name shall be persistent,
+                    and unique within the station.
+
+                    When YANG is used for management, InterfaceName
+                    typically corresponds to the leaf that serves
+                    as the unique key for the interface, as specified
+                    in RFC 7223.
+
+                    This interface name can be discovered in the physical
+                    topology using protocols such as IEEE Std 802.1AB
+                    (LLDP). Within LLDP, this value can be obtained from
+                    the interface name of the Port ID, assuming that
+                    name is unique within the station. If LLDP does not
+                    use interface name as the Port ID, YANG management
+                    can be used to associate the interface name to
+                    the identifier provided in the LLDP Port ID.";
+             }
+         }
+    }
+  }
+}
