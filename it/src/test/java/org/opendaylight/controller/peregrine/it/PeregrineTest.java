@@ -56,6 +56,6 @@ public class PeregrineTest extends AbstractMdsalTestBase {
 
     @Test
     public void testperegrineFeatureLoad() {
-        Assert.assertTrue(true);
+        System.out.print(1);
     }
 }
