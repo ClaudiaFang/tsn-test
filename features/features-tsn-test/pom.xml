@@ -13,12 +13,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>feature-repo-parent</artifactId>
-    <version>3.1.1</version>
+    <version>4.0.0-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
-  <groupId>org.opendaylight.controller.peregrine</groupId>
-  <artifactId>features-peregrine</artifactId>
+  <groupId>org.opendaylight.controller.moxa-aggregator</groupId>
+  <artifactId>features-tsn-test</artifactId>
   <version>0.1.0</version>
   <packaging>feature</packaging>
   <!-- <name> formatting is used by autorelease to parse and notify projects on
@@ -36,28 +36,28 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>odl-peregrine-api</artifactId>
+      <artifactId>odl-tsn-test-api</artifactId>
       <version>${project.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>odl-peregrine</artifactId>
+      <artifactId>odl-tsn-test</artifactId>
       <version>${project.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>odl-peregrine-cli</artifactId>
+      <artifactId>odl-tsn-test-cli</artifactId>
       <version>${project.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>odl-peregrine-rest</artifactId>
+      <artifactId>odl-tsn-test-rest</artifactId>
       <version>${project.version}</version>
       <type>xml</type>
       <classifier>features</classifier>

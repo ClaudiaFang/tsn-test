@@ -13,21 +13,21 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent-lite</artifactId>
-    <version>3.1.1</version>
+    <version>4.0.0-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
-  <groupId>org.opendaylight.controller.peregrine</groupId>
-  <artifactId>peregrine-features-aggregator</artifactId>
+  <groupId>org.opendaylight.controller.moxa-aggregator</groupId>
+  <artifactId>tsn-test-features-aggregator</artifactId>
   <version>0.1.0</version>
   <packaging>pom</packaging>
-  <name>ODL :: org.opendaylight.controller.peregrine :: ${project.artifactId}</name>
+  <name>ODL :: org.opendaylight.controller.moxa-aggregator :: ${project.artifactId}</name>
 
   <modules>
-    <module>features-peregrine</module>
-    <module>odl-peregrine-api</module>
-    <module>odl-peregrine</module>
-    <module>odl-peregrine-rest</module>
-    <module>odl-peregrine-cli</module>
+    <module>features-tsn-test</module>
+    <module>odl-tsn-test-api</module>
+    <module>odl-tsn-test</module>
+    <module>odl-tsn-test-rest</module>
+    <module>odl-tsn-test-cli</module>
   </modules>
 </project>

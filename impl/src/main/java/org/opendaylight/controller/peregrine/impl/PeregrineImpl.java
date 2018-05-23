@@ -5,30 +5,31 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
+
 package org.opendaylight.controller.peregrine.impl;
 
-import java.util.List;
-import java.util.LinkedList;
-
 import com.google.common.util.concurrent.Futures;
+
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Future;
 
-import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.StreamID;
-import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.StreamIDBuilder;
-import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.StatusInfo;
-import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.StatusInfoBuilder;
-import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.StatusInfo.ListenerStatus;
-import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.StatusInfo.TalkerStatus;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupinterfaceconfiguration.InterfaceList;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupinterfaceconfiguration.InterfaceListBuilder;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupinterfaceconfiguration.interfacelist.ConfigList;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupinterfaceconfiguration.interfacelist.ConfigListBuilder;
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.AccumulatedLatency;
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.AccumulatedLatencyBuilder;
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.FailedInterfaces;
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.FailedInterfacesBuilder;
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.InterfaceConfiguration;
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.InterfaceConfigurationBuilder;
-import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupinterfaceconfiguration.InterfaceList;
-import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupinterfaceconfiguration.InterfaceListBuilder;
-import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupinterfaceconfiguration.interfacelist.ConfigList;
-import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupinterfaceconfiguration.interfacelist.ConfigListBuilder;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.StatusInfo;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.StatusInfo.ListenerStatus;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.StatusInfo.TalkerStatus;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.StatusInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.StreamID;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.groupstatus.StreamIDBuilder;
 
 import org.opendaylight.yang.gen.v1.urn.opendaylight.peregrine.rev180401.AddAllListenersInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.peregrine.rev180401.AddAllTalkersInput;

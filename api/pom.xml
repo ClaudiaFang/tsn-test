@@ -17,8 +17,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <relativePath/>
   </parent>
 
-  <groupId>org.opendaylight.controller.peregrine</groupId>
-  <artifactId>peregrine-api</artifactId>
+  <groupId>org.opendaylight.controller.moxa-aggregator</groupId>
+  <artifactId>tsn-test-api</artifactId>
   <version>0.1.0</version>
   <!-- <name> formatting is used by autorelease to parse and notify projects on
        build failure. Please do not modify this unless you have a good reason. -->
@@ -27,8 +27,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <dependencies>
     <dependency>
-      <groupId>org.opendaylight.controller.peregrine</groupId>
-      <artifactId>peregrine-model</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>tsn-test-model</artifactId>
       <version>0.1.0</version>
     </dependency>
     <dependency>

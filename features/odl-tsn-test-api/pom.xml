@@ -7,16 +7,16 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>single-feature-parent</artifactId>
-        <version>3.1.1</version>
+        <version>4.0.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
-    <groupId>org.opendaylight.controller.peregrine</groupId>
-    <artifactId>odl-peregrine</artifactId>
+    <groupId>org.opendaylight.controller.moxa-aggregator</groupId>
+    <artifactId>odl-tsn-test-api</artifactId>
     <version>0.1.0</version>
     <packaging>feature</packaging>
 
-    <name>OpenDaylight :: peregrine :: Impl [Karaf Feature]</name>
+    <name>OpenDaylight :: peregrine :: API [Karaf Feature]</name>
 
     <dependencyManagement>
         <dependencies>
@@ -39,21 +39,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-mdsal-broker</artifactId>
+            <groupId>org.opendaylight.mdsal.model</groupId>
+            <artifactId>odl-mdsal-models</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>odl-peregrine-api</artifactId>
-            <version>${project.version}</version>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>peregrine-impl</artifactId>
+            <artifactId>tsn-test-api</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
