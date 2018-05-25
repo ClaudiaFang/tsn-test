@@ -50,6 +50,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <artifactId>sal-binding-api</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-common-util</artifactId>
+    </dependency>
+
     <!-- Testing Dependencies -->
     <dependency>
       <groupId>junit</groupId>

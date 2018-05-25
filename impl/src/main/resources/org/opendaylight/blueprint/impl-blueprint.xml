@@ -8,17 +8,24 @@ terms of the Eclipse Public License v1.0 which accompanies this distribution,
 and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-  xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
-  odl:use-default-for-reference-types="true">
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+           odl:use-default-for-reference-types="true">
 
   <reference id="dataBroker"
     interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
     odl:type="default" />
 
-  <bean id="provider"
+  <reference id="notificationService"
+             interface="org.opendaylight.controller.md.sal.binding.api.NotificationPublishService"/>
+
+  <bean id="peregrine"
     class="org.opendaylight.controller.peregrine.impl.PeregrineProvider"
     init-method="init" destroy-method="close">
-    <argument ref="dataBroker" />
+    <property name="dataBroker" ref="dataBroker"/>
   </bean>
 
+  <!-- Register the provider instance as an RPC implementation provider. The "rpc-implementation"
+       element automatically figures out the RpcService interface although it can be explicitly specified.
+   -->
+  <odl:rpc-implementation ref="peregrine"/>
 </blueprint>
