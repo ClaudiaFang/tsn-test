@@ -1,6 +1,6 @@
 module peregrine {
     yang-version 1.1;
-    namespace "urn:opendaylight:peregrine";
+    namespace "urn:opendaylight:moit-tsn:cnc";
     prefix "dte";
 
     revision "2018-04-01" { // TODO change revision to date of model creation
@@ -42,7 +42,25 @@ module peregrine {
     rpc getStreamStatus {
         output {
             list status {
+                config false;
                 uses status:GroupStatus;
+            }
+        }
+    }
+
+    rpc getExamples {
+        output {
+            list status {
+                config false;
+                uses status:GroupStatus;
+            }
+            list talkers {
+                config false;
+                uses talker:GroupTalker;
+            }
+            list listeners {
+                config false;
+                uses listener:GroupListener;
             }
         }
     }

@@ -1,6 +1,6 @@
 module ieee802-dot1q-cc-base {
 
-  namespace "urn:ieee:std:802.1Q:yang:ieee802-dot1q-cc-base";
+  namespace "urn:ieee:std:802.1Q:yang:ieee802-dot1q-cc:base";
   prefix "dot1q-cc";
 
   import ietf-inet-types { prefix "inet"; }

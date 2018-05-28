@@ -1,6 +1,6 @@
 module ieee802-dot1q-cc-status {
 
-  namespace "urn:ieee:std:802.1Q:yang:ieee802-dot1q-cc-status";
+  namespace "urn:ieee:std:802.1Q:yang:ieee802-dot1q-cc:status";
   prefix "dot1q-cc-status";
 
   import ietf-inet-types { prefix "inet"; }
