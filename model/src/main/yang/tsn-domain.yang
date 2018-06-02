@@ -1,14 +1,13 @@
 module tsn-domain {
     yang-version 1.1;
-    namespace "urn:opendaylight:peregrine:tsn-domain";
+    namespace "urn:ietf:params:xml:ns:netconf:1.0:cnc:cnc-model:tsn-domain";
     prefix "tsn-domain";
 
     revision "2018-04-01" { // TODO change revision to date of model creation
         description "Initial revision of peregrine model";
     }
 
-    grouping groupTSNDomain {
-
+    grouping GroupTSNDomain {
         leaf id {
             type string;
         }
@@ -16,7 +15,5 @@ module tsn-domain {
         leaf name {
             type string;
         }
-
     }
-
 }

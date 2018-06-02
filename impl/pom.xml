@@ -71,6 +71,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
     </dependency>
+
   </dependencies>
 
   <build>

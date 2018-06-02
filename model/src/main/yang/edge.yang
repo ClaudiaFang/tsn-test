@@ -1,25 +1,13 @@
 module edge {
     yang-version 1.1;
-    namespace "urn:opendaylight:peregrine:edge";
+    namespace "urn:ietf:params:xml:ns:netconf:1.0:cnc:cnc-model:edge";
     prefix "edge";
 
     revision "2018-04-01" { // TODO change revision to date of model creation
         description "Initial revision of peregrine model";
     }
 
-    grouping groupCapacity{
-
-        leaf capacity_value {
-            type uint32;
-        }
-
-        leaf capacity_desc {
-            type string;
-        }
-
-    }
-
-    grouping groupEdge {
+    grouping GroupEdge {
 
         leaf headMAC {
             type string;
@@ -38,8 +26,14 @@ module edge {
         }
 
         container capacity {
-            uses groupCapacity;
-        }
 
+            leaf capacityValue {
+                type uint32;
+            }
+
+            leaf capacityDesc {
+                type string;
+            }
+        }
     }
 }

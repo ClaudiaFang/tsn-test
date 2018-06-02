@@ -9,8 +9,13 @@ package org.opendaylight.controller.peregrine.impl;
 
 import com.google.common.util.concurrent.Futures;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.base.rev180215.GroupInterfaceCapabilities;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.base.rev180215.GroupInterfaceId;
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.base.rev180215.GroupStreamID;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.base.rev180215.GroupUserToNetworkRequirements;
+
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.GroupListener;
 
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.status.rev180215.GroupStatus;
@@ -48,32 +53,28 @@ import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.UserToNetworkRequirementsBuilder;
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.dataframespecification.Field;
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.dataframespecification.field.Ieee802MacAddressesBuilder;
-import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.dataframespecification.field.ieee802.mac.addresses.Ieee802MacAddresses;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.dataframespecification.field.Ieee802VlanTagBuilder;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.dataframespecification.field.Ipv4TupleBuilder;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.dataframespecification.field.Ipv6TupleBuilder;
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.trafficspecification.Interval;
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.trafficspecification.IntervalBuilder;
-
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.trafficspecification.TimeAware;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.AddAllListenersInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.AddAllTalkersInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.AddAllTalkersInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.AddAllTalkersInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.GetExamplesOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.GetExamplesOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.GetStreamStatusOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.GetStreamStatusOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.GetStreamStatusOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.PeregrineService;
+import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.trafficspecification.TimeAwareBuilder;
 
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.getexamples.output.Listeners;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.getexamples.output.ListenersBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.getexamples.output.Status;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.getexamples.output.StatusBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.getexamples.output.Talkers;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.getexamples.output.TalkersBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.AddAllListenersInput;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.AddAllTalkersInput;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.GetExamplesOutput;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.GetExamplesOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.GetStreamStatusOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.GetStreamStatusOutput;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.CncFunctinsService;
 
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getexamples.output.ListenersBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getexamples.output.StatusBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getexamples.output.TalkersBuilder;
 
-import org.opendaylight.yangtools.yang.binding.Augmentation;
-import org.opendaylight.yangtools.yang.binding.DataContainer;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv6Address;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
@@ -85,7 +86,7 @@ import java.util.Random;
 import java.util.concurrent.Future;
 
 public class PeregrineProvider
-        implements PeregrineService, AutoCloseable{
+        implements CncFunctinsService, AutoCloseable{
 
     private static final Logger LOG = LoggerFactory.getLogger(PeregrineProvider.class);
 
@@ -143,10 +144,10 @@ public class PeregrineProvider
     @Override
     public Future<RpcResult<GetStreamStatusOutput>> getStreamStatus() {
 
-        LinkedList<org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.getstreamstatus.output.Status> statusLinkedList = new LinkedList<>();
+        LinkedList<org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getstreamstatus.output.Status> statusLinkedList = new LinkedList<>();
         for(GroupStatus st: genStatusLists()){
             statusLinkedList.add(
-                    new org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.getstreamstatus.output.StatusBuilder(st).build());
+                    new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getstreamstatus.output.StatusBuilder(st).build());
         }
 
         GetStreamStatusOutput output = new GetStreamStatusOutputBuilder()
@@ -161,27 +162,27 @@ public class PeregrineProvider
     @Override
     public Future<RpcResult<GetExamplesOutput>> getExamples(){
 
-        LinkedList<org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.getexamples.output.Talkers> talkersLinkedList = new LinkedList<>();
+        LinkedList<org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getexamples.output.Talkers> talkersLinkedList = new LinkedList<>();
         for(GroupTalker ta: genTalkerList()){
             talkersLinkedList.add(
-                    new org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.getexamples.output.TalkersBuilder(ta).build());
+                    new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getexamples.output.TalkersBuilder(ta).build());
         }
 
-        LinkedList<org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.getexamples.output.Listeners> listenersLinkedList = new LinkedList<>();
+        LinkedList<org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getexamples.output.Listeners> listenersLinkedList = new LinkedList<>();
         for(GroupListener li: genListenerList()){
             listenersLinkedList.add(
-                    new org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.getexamples.output.ListenersBuilder(li).build());
+                    new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getexamples.output.ListenersBuilder(li).build());
         }
 
-        LinkedList<org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.getexamples.output.Status> statusLinkedList = new LinkedList<>();
+        LinkedList<org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getexamples.output.Status> statusLinkedList = new LinkedList<>();
         for(GroupStatus st: genStatusLists()){
             statusLinkedList.add(
-                    new org.opendaylight.yang.gen.v1.urn.opendaylight.moit.tsn.cnc.rev180401.getexamples.output.StatusBuilder(st).build());
+                    new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getexamples.output.StatusBuilder(st).build());
         }
 
         GetExamplesOutput output = new GetExamplesOutputBuilder()
                 .setStatus(statusLinkedList)
-                .setListeners(null)
+                .setListeners(listenersLinkedList)
                 .setTalkers(talkersLinkedList)
                 .build();
 
@@ -203,11 +204,11 @@ public class PeregrineProvider
 
         StreamID streamID = new StreamIDBuilder()
                 .setUniqueID(new Random().nextInt(65535))
-                .setMacAddress("AA:BB:CC:DD:EE:FF").build();
+                .setMacAddress("AA-BB-CC-DD-EE-FF").build();
 
         List<FailedInterfaces> failedInterfacesList = new LinkedList<>();
         FailedInterfaces failedInterfaces = new FailedInterfacesBuilder()
-                .setKey(new FailedInterfacesKey("AA:BB:CC:DD:EE:FF"))
+                .setKey(new FailedInterfacesKey("AA-BB-CC-DD-EE-FF"))
                 .build();
 
         failedInterfacesList.add(failedInterfaces);
@@ -224,7 +225,7 @@ public class PeregrineProvider
 
         InterfaceList interfaceList = new InterfaceListBuilder()
                 .setConfigList(configListList)
-                .setMacAddress("AA:BB:CC:DD:EE:FF")
+                .setMacAddress("AA-BB-CC-DD-EE-FF")
                 .build();
         interfaceListsList.add(interfaceList);
         InterfaceConfiguration interfaceConfiguration = new InterfaceConfigurationBuilder()
@@ -251,39 +252,35 @@ public class PeregrineProvider
 
         List<GroupListener> output = new LinkedList<>();
 
-        org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.EndStationInterfaces endStationInterfaces=
-                new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.EndStationInterfacesBuilder()
+        GroupInterfaceId endStationInterfaces= new EndStationInterfacesBuilder()
                 .setInterfaceName("eth0")
-                .setKey(new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.EndStationInterfacesKey("eth0","AA:BB:CC:DD:EE:FF"))
-                .setMacAddress("AA:BB:CC:DD:EE:FF")
+                .setKey(new EndStationInterfacesKey("eth0","AA-BB-CC-DD-EE-FF"))
+                .setMacAddress("AA-BB-CC-DD-EE-FF")
                 .build();
-        List<org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.EndStationInterfaces> endStationInterfacesList = new LinkedList<>();
-        endStationInterfacesList.add(endStationInterfaces);
 
-        org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.InterfaceCapabilities interfaceCapabilities
-                = new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.InterfaceCapabilitiesBuilder()
+        GroupInterfaceCapabilities interfaceCapabilities = new InterfaceCapabilitiesBuilder()
                 .setCbSequenceTypeList(new LinkedList<Long>(){{ add(1L); add(2L);}})
                 .setCbStreamIdenTypeList(new LinkedList<Long>(){{ add(1L); add(2L);}})
                 .setVlanTagCapable(false)
                 .build();
 
-        org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.StreamID streamID
-                = new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.StreamIDBuilder()
+        GroupStreamID streamID = new StreamIDBuilder()
                 .setUniqueID(new Random().nextInt(65535))
-                .setMacAddress("AA:BB:CC:DD:EE:FF")
+                .setMacAddress("AA-BB-CC-DD-EE-FF")
                 .build();
 
-        org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.UserToNetworkRequirements userToNetworkRequirements
-                = new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.UserToNetworkRequirementsBuilder()
+        GroupUserToNetworkRequirements userToNetworkRequirements = new UserToNetworkRequirementsBuilder()
                 .setMaxLatency(1234L)
                 .setNumSeamlessTrees((short)2)
                 .build();
 
         GroupListener talker = new ListenersBuilder()
-                .setEndStationInterfaces(endStationInterfacesList)
-                .setInterfaceCapabilities(interfaceCapabilities)
-                .setStreamID(streamID)
-                .setUserToNetworkRequirements(userToNetworkRequirements)
+                .setEndStationInterfaces(new LinkedList<org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.EndStationInterfaces>() {{
+                        add(new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.EndStationInterfacesBuilder(endStationInterfaces).build());
+                    }})
+                .setInterfaceCapabilities(new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.InterfaceCapabilitiesBuilder(interfaceCapabilities).build())
+                .setStreamID(new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.StreamIDBuilder(streamID).build())
+                .setUserToNetworkRequirements(new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.UserToNetworkRequirementsBuilder(userToNetworkRequirements).build())
                 .build();
         output.add(talker);
 
@@ -294,27 +291,76 @@ public class PeregrineProvider
 
         List<GroupTalker> output = new LinkedList<>();
 
+        List<DataFrameSpecification> dataFrameSpecificationList = new LinkedList<>();
+
         Field field = new Ieee802MacAddressesBuilder()
                 .setIeee802MacAddresses(
                         new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.dataframespecification.field.ieee802.mac.addresses.Ieee802MacAddressesBuilder()
-                                .setDestinationMacAddress("AA:AA:AA:AA:AA:AA")
-                                .setSourceMacAddress("BB:BB:BB:BB:BB:BB")
+                                .setDestinationMacAddress("AA-AA-AA-AA-AA-AA")
+                                .setSourceMacAddress("BB-BB-BB-BB-BB-BB")
                                 .build())
                 .build();
-
         DataFrameSpecification dataFrameSpecification = new DataFrameSpecificationBuilder()
                 .setField(field)
                 .setIndex((short)1)
                 .setKey(new DataFrameSpecificationKey((short)1))
                 .build();
+        dataFrameSpecificationList.add(dataFrameSpecification);
 
-        List<DataFrameSpecification> dataFrameSpecificationList = new LinkedList<>();
+        field = new Ieee802VlanTagBuilder()
+                .setIeee802VlanTag(
+                        new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.dataframespecification.field.ieee802.vlan.tag.Ieee802VlanTagBuilder()
+                                .setPriorityCodePoint((short) 5)
+                                .setVlanId( 300 )
+                                .build())
+                .build();
+        dataFrameSpecification = new DataFrameSpecificationBuilder()
+                .setField(field)
+                .setIndex((short)2)
+                .setKey(new DataFrameSpecificationKey((short)2))
+                .build();
+        dataFrameSpecificationList.add(dataFrameSpecification);
+
+        field = new Ipv4TupleBuilder()
+                .setIpv4Tuple(
+                        new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.dataframespecification.field.ipv4.tuple.Ipv4TupleBuilder()
+                                .setDestinationIpAddress(new Ipv4Address("192.168.56.101"))
+                                .setDestinationPort( 300 )
+                                .setDscp((short) 50)
+                                .setProtocol(17)
+                                .setSourceIpAddress(new Ipv4Address("192.168.56.102"))
+                                .setSourcePort(80)
+                                .build())
+                .build();
+        dataFrameSpecification = new DataFrameSpecificationBuilder()
+                .setField(field)
+                .setIndex((short)3)
+                .setKey(new DataFrameSpecificationKey((short)3))
+                .build();
+        dataFrameSpecificationList.add(dataFrameSpecification);
+
+        field = new Ipv6TupleBuilder()
+                .setIpv6Tuple(
+                        new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.dataframespecification.field.ipv6.tuple.Ipv6TupleBuilder()
+                                .setDestinationIpAddress(new Ipv6Address("FE80::0202:B3FF:FE1E:8329"))
+                                .setDestinationPort( 300 )
+                                .setDscp((short) 50)
+                                .setProtocol(17)
+                                .setSourceIpAddress(new Ipv6Address("FE80::0202:B3FF:FE1E:832A"))
+                                .setSourcePort(80)
+                                .build())
+                .build();
+        dataFrameSpecification = new DataFrameSpecificationBuilder()
+                .setField(field)
+                .setIndex((short)4)
+                .setKey(new DataFrameSpecificationKey((short)4))
+                .build();
         dataFrameSpecificationList.add(dataFrameSpecification);
 
         EndStationInterfaces endStationInterfaces = new EndStationInterfacesBuilder()
                 .setInterfaceName("eth0")
-                .setKey(new EndStationInterfacesKey("eth0","AA:BB:CC:DD:EE:FF"))
-                .setMacAddress("AA:BB:CC:DD:EE:FF")
+                .setKey(new EndStationInterfacesKey("eth0","AA-BB-CC-DD-EE-FF"))
+                .setMacAddress("AAB:CC:DD:EE:FF")
                 .build();
         List<EndStationInterfaces> endStationInterfacesList = new LinkedList<>();
         endStationInterfacesList.add(endStationInterfaces);
@@ -325,10 +371,10 @@ public class PeregrineProvider
                 .setVlanTagCapable(false)
                 .build();
 
-        org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.StreamID streamID
-                = new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.StreamIDBuilder()
+        GroupStreamID streamID
+                = new StreamIDBuilder()
                 .setUniqueID(new Random().nextInt(65535))
-                .setMacAddress("AA:BB:CC:DD:EE:FF")
+                .setMacAddress("AA-BB-CC-DD-EE-FF")
                 .build();
 
         StreamRank rank = new StreamRankBuilder()
@@ -340,8 +386,7 @@ public class PeregrineProvider
                 .setNumerator(3L)
                 .build();
 
-        org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.trafficspecification.TimeAware timeAware
-                = new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.trafficspecification.TimeAwareBuilder()
+        TimeAware timeAware = new TimeAwareBuilder()
                 .setEarliestTransmitOffset(2L)
                 .setJitter(5L)
                 .setLatestTransmitOffset(3L)
@@ -364,7 +409,7 @@ public class PeregrineProvider
                 .setDataFrameSpecification(dataFrameSpecificationList)
                 .setEndStationInterfaces(endStationInterfacesList)
                 .setInterfaceCapabilities(interfaceCapabilities)
-                .setStreamID(streamID)
+                .setStreamID(new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.StreamIDBuilder(streamID).build())
                 .setStreamRank(rank)
                 .setTrafficSpecification(trafficSpecification)
                 .setUserToNetworkRequirements(userToNetworkRequirements)

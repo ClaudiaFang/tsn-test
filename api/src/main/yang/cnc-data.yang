@@ -1,0 +1,112 @@
+module cnc-data {
+    yang-version 1.1;
+    namespace "urn:ietf:params:xml:ns:netconf:1.0:cnc:cnc-data";
+    prefix "cnc";
+
+    revision "2018-04-01" { // TODO change revision to date of model creation
+        description "Initial revision of CNC model";
+    }
+
+    import ieee802-dot1q-cc-base {
+        prefix base;
+    }
+
+    import ieee802-dot1q-cc-listener {
+        prefix listener;
+    }
+
+    import ieee802-dot1q-cc-talker {
+        prefix talker;
+    }
+
+    import ieee802-dot1q-cc-status {
+        prefix status;
+    }
+
+    import switch {
+        prefix switch;
+    }
+
+    import edge {
+        prefix edge;
+    }
+
+    import tsn-domain {
+        prefix tsn-domain;
+    }
+
+    import end-device {
+        prefix end-device;
+    }
+
+    container tsn_domains {
+        list domain{
+            key id;
+            uses tsn-domain:GroupTSNDomain;
+        }
+    }
+
+    container switches {
+        list switch{
+            key mac;
+            uses switch:GroupSwitch;
+        }
+    }
+
+    container end_devices {
+        list end_device{
+            key name;
+            uses end-device:GroupEndDevice;
+        }
+    }
+
+    container current_topology{
+        list tsn_domain {
+            config false;
+            key tsn_domain_id;
+            leaf tsn_domain_id {
+                type string;
+            }
+            list topology{
+                list edges{
+                    uses edge:GroupEdge;
+                }
+            }
+        }
+    }
+
+    container talkers{
+        list talker{
+            key UniqueID;
+            leaf UniqueID {
+                type uint16;
+                description
+                  "This 16-bit UniqueID is used to distinguish
+                  between multiple streams within the system
+                  identified by MacAddress.";
+            }
+            uses talker:GroupTalker;
+        }
+    }
+
+    container listeners{
+        list listener{
+            key UniqueID;
+            leaf UniqueID {
+                type uint16;
+                description
+                  "This 16-bit UniqueID is used to distinguish
+                  between multiple streams within the system
+                  identified by MacAddress.";
+            }
+            uses listener:GroupListener;
+        }
+    }
+
+    container streams_status {
+        config false;
+        list status{
+            uses status:GroupStatus;
+        }
+    }
+}
