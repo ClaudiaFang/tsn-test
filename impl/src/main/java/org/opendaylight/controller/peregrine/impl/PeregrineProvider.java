@@ -7,9 +7,50 @@
  */
 package org.opendaylight.controller.peregrine.impl;
 
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
+import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+
+import static org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType.DELETE;
+import static org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType.WRITE;
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
+import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
+import static org.opendaylight.yangtools.yang.common.RpcError.ErrorType.APPLICATION;
+
+import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
+
+import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.Listeners;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.ListenersBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.StreamsStatus;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.StreamsStatusBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.Talkers;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.TalkersBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.TsnDomains;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.TsnDomainsBuilder;
+
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.listeners.Listener;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.listeners.ListenerBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.listeners.ListenerKey;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.streams_status.Status;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.streams_status.StatusBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.talkers.Talker;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.talkers.TalkerBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.talkers.TalkerKey;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.tsn_domains.Domain;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.tsn_domains.DomainBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.tsn_domains.DomainKey;
 
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.base.rev180215.GroupInterfaceCapabilities;
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.base.rev180215.GroupInterfaceId;
@@ -61,20 +102,15 @@ import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.trafficspecification.TimeAware;
 import org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.talker.rev180215.grouptalker.trafficspecification.TimeAwareBuilder;
 
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.AddAllListenersInput;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.AddAllTalkersInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.GetExamplesOutput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.GetExamplesOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.GetStreamStatusOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.GetStreamStatusOutput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.CncFunctinsService;
-
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getexamples.output.ListenersBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getexamples.output.StatusBuilder;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getexamples.output.TalkersBuilder;
 
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv6Address;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
@@ -83,6 +119,7 @@ import org.slf4j.LoggerFactory;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public class PeregrineProvider
@@ -91,6 +128,11 @@ public class PeregrineProvider
     private static final Logger LOG = LoggerFactory.getLogger(PeregrineProvider.class);
 
     private DataBroker dataBroker;
+
+    private static final InstanceIdentifier<Listeners> LISTENERS_IID = InstanceIdentifier.builder(Listeners.class).build();
+    private static final InstanceIdentifier<StreamsStatus> STREAMS_STATUS_IID = InstanceIdentifier.builder(StreamsStatus.class).build();
+    private static final InstanceIdentifier<Talkers> TALKERS_IID = InstanceIdentifier.builder(Talkers.class).build();
+    private static final InstanceIdentifier<TsnDomains> TSN_DOMAINS_IID = InstanceIdentifier.builder(TsnDomains.class).build();
 
     public PeregrineProvider(final DataBroker dataBroker) {
 
@@ -114,7 +156,7 @@ public class PeregrineProvider
     public void init() {
         LOG.info("PeregrineProvider Session Initiated");
 
-        // Preconditions.checkNotNull(dataBroker, "dataBroker must be set");
+        Preconditions.checkNotNull(dataBroker, "dataBroker must be set");
 
         // Register our MXBean.
         // register();
@@ -130,37 +172,11 @@ public class PeregrineProvider
         // unregister();
     }
 
-
-    @Override
-    public Future<RpcResult<Void>> addAllListeners(AddAllListenersInput input) {
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
-    }
-
-    @Override
-    public Future<RpcResult<Void>> addAllTalkers(AddAllTalkersInput input) {
-        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
-    }
-
-    @Override
-    public Future<RpcResult<GetStreamStatusOutput>> getStreamStatus() {
-
-        LinkedList<org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getstreamstatus.output.Status> statusLinkedList = new LinkedList<>();
-        for(GroupStatus st: genStatusLists()){
-            statusLinkedList.add(
-                    new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getstreamstatus.output.StatusBuilder(st).build());
-        }
-
-        GetStreamStatusOutput output = new GetStreamStatusOutputBuilder()
-                .setStatus(statusLinkedList)
-                .build();
-
-        LOG.info("getStreamStatus(): return {}", output);
-
-        return RpcResultBuilder.success(output).buildFuture();
-    }
-
     @Override
     public Future<RpcResult<GetExamplesOutput>> getExamples(){
+
+        final SettableFuture<RpcResult<GetExamplesOutput>> futureResult = SettableFuture.create();
+
 
         LinkedList<org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getexamples.output.Talkers> talkersLinkedList = new LinkedList<>();
         for(GroupTalker ta: genTalkerList()){
@@ -180,6 +196,78 @@ public class PeregrineProvider
                     new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getexamples.output.StatusBuilder(st).build());
         }
 
+        /*ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+        ListenableFuture<Optional<StreamsStatus>> readFuture = tx.read(OPERATIONAL, STREAMS_STATUS_IID);
+
+        try {
+            readFuture.get().get().getStatus();
+        }
+        catch (Exception ex){
+            if(ex instanceof ExecutionException){
+
+                futureResult.set(RpcResultBuilder.<GetExamplesOutput>failed()
+                        .withError(RpcError.ErrorType.APPLICATION, ex.getMessage()).build());
+            }
+            if(ex instanceof InterruptedException){
+                futureResult.set(RpcResultBuilder.<GetExamplesOutput>failed().withError(RpcError.ErrorType.APPLICATION,
+                        "Unexpected error committing status", ex).build());
+            }
+            tx.cancel();
+            return futureResult;
+        }
+        tx.commit();*/
+
+        ReadWriteTransaction tx = dataBroker.newReadWriteTransaction();
+        ListenableFuture<Optional<StreamsStatus>> readFuture = tx.read(OPERATIONAL, STREAMS_STATUS_IID);
+
+        final ListenableFuture<Void> commitFuture =
+            Futures.transformAsync(readFuture, data -> {
+
+                if ( data.isPresent()){
+                    statusLinkedList.clear();
+
+                    for(GroupStatus st: data.get().getStatus() ){
+                        statusLinkedList.add(new org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.functions.rev180401.getexamples.output.StatusBuilder(st)
+                                .build());
+                    }
+                }
+                else {
+                    LOG.debug("Data not exists!");
+                    return Futures.immediateFailedCheckedFuture(
+                            new TransactionCommitFailedException("", makeToasterOutOfBreadError()));
+                }
+
+                LOG.debug("Read status from data store: {}", data.get().getStatus());
+
+                return tx.submit();
+            });
+
+        Futures.addCallback(commitFuture, new FutureCallback<Void>() {
+            @Override
+            public void onSuccess(final Void result) {
+            }
+
+            @Override
+            public void onFailure(final Throwable ex) {
+                if (ex instanceof OptimisticLockFailedException) {
+
+                    futureResult.set(RpcResultBuilder.<GetExamplesOutput>failed()
+                            .withError(RpcError.ErrorType.APPLICATION, ex.getMessage()).build());
+
+                } else if (ex instanceof TransactionCommitFailedException) {
+                    LOG.debug("Failed to commit status", ex);
+
+                    futureResult.set(RpcResultBuilder.<GetExamplesOutput>failed()
+                            .withRpcErrors(((TransactionCommitFailedException)ex).getErrorList()).build());
+
+                } else {
+                    LOG.debug("Unexpected error committing Toaster status", ex);
+                    futureResult.set(RpcResultBuilder.<GetExamplesOutput>failed().withError(RpcError.ErrorType.APPLICATION,
+                            "Unexpected error committing status", ex).build());
+                }
+            }
+        });
+
         GetExamplesOutput output = new GetExamplesOutputBuilder()
                 .setStatus(statusLinkedList)
                 .setListeners(listenersLinkedList)
@@ -190,6 +278,29 @@ public class PeregrineProvider
 
         return RpcResultBuilder.success(output).buildFuture();
     }
+
+    @Override
+    public Future<RpcResult<java.lang.Void>> removeAllCNCDataFromDataStore(){
+        WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+        tx.delete(CONFIGURATION, TSN_DOMAINS_IID);
+        tx.delete(CONFIGURATION, TALKERS_IID);
+        tx.delete(CONFIGURATION, LISTENERS_IID);
+        tx.delete(OPERATIONAL, STREAMS_STATUS_IID);
+        tx.submit();
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+    }
+
+    @Override
+    public Future<RpcResult<java.lang.Void>> addCNCTestDataToDataStore(){
+        WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+        tx.put(CONFIGURATION,TSN_DOMAINS_IID,  buildTSNDomains());
+        tx.put(OPERATIONAL,STREAMS_STATUS_IID, buildStreamsStatus());
+        tx.put(CONFIGURATION, TALKERS_IID, buildTalkers());
+        tx.put(CONFIGURATION, LISTENERS_IID, buildListeners());
+        tx.submit();
+        return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+    }
+
 
     private List<GroupStatus> genStatusLists(){
         StatusInfo statusInfo = new StatusInfoBuilder()
@@ -274,7 +385,7 @@ public class PeregrineProvider
                 .setNumSeamlessTrees((short)2)
                 .build();
 
-        GroupListener talker = new ListenersBuilder()
+        GroupListener listener = new ListenerBuilder()
                 .setEndStationInterfaces(new LinkedList<org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.EndStationInterfaces>() {{
                         add(new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.EndStationInterfacesBuilder(endStationInterfaces).build());
                     }})
@@ -282,7 +393,7 @@ public class PeregrineProvider
                 .setStreamID(new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.StreamIDBuilder(streamID).build())
                 .setUserToNetworkRequirements(new org.opendaylight.yang.gen.v1.urn.ieee.std._802._1q.yang.ieee802.dot1q.cc.listener.rev180215.grouplistener.UserToNetworkRequirementsBuilder(userToNetworkRequirements).build())
                 .build();
-        output.add(talker);
+        output.add(listener);
 
         return output;
     }
@@ -405,7 +516,7 @@ public class PeregrineProvider
                 .setNumSeamlessTrees((short)2)
                 .build();
 
-        GroupTalker talker = new TalkersBuilder()
+        GroupTalker talker = new TalkerBuilder()
                 .setDataFrameSpecification(dataFrameSpecificationList)
                 .setEndStationInterfaces(endStationInterfacesList)
                 .setInterfaceCapabilities(interfaceCapabilities)
@@ -417,5 +528,67 @@ public class PeregrineProvider
         output.add(talker);
 
         return output;
+    }
+
+    private TsnDomains buildTSNDomains(){
+
+        List<Domain> output = new LinkedList<>();
+
+        output.add( new DomainBuilder()
+                .setName("Domain1")
+                .setKey(new DomainKey("12345"))
+                .setId("12345")
+                .build());
+
+        output.add( new DomainBuilder()
+                .setName("Domain2")
+                .setKey(new DomainKey("12346"))
+                .setId("12346")
+                .build());
+
+        return new TsnDomainsBuilder()
+                .setDomain(output)
+                .build();
+    }
+
+    private StreamsStatus buildStreamsStatus(){
+
+        List<Status> output = new LinkedList<>();
+        for(GroupStatus st: genStatusLists()){
+            output.add( new StatusBuilder(st).build());
+        }
+
+        return new StreamsStatusBuilder()
+                .setStatus(output)
+                .build();
+    }
+
+    private Talkers buildTalkers(){
+
+        List<Talker> output = new LinkedList<>();
+        for(GroupTalker ta: genTalkerList()){
+            output.add( new TalkerBuilder(ta).setKey(new TalkerKey(ta.getStreamID().getUniqueID())).build());
+        }
+
+        return new TalkersBuilder()
+                .setTalker(output)
+                .build();
+    }
+
+    private Listeners buildListeners(){
+
+        List<Listener> output = new LinkedList<>();
+        for(GroupListener li: genListenerList()){
+            output.add( new ListenerBuilder(li).setKey(new ListenerKey(li.getStreamID().getUniqueID())).build());
+        }
+
+        return new ListenersBuilder()
+                .setListener(output)
+                .build();
+    }
+
+    private RpcError makeToasterOutOfBreadError() {
+        return RpcResultBuilder.newError(APPLICATION, "resource-denied", "Toaster is out of bread", "out-of-stock",
+                null, null);
     }
 }

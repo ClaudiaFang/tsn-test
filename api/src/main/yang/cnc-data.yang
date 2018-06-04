@@ -61,8 +61,8 @@ module cnc-data {
     }
 
     container current_topology{
+        config false;
         list tsn_domain {
-            config false;
             key tsn_domain_id;
             leaf tsn_domain_id {
                 type string;

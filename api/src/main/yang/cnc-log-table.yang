@@ -1,0 +1,45 @@
+module cnc-log-table {
+    yang-version 1.1;
+    namespace "urn:ietf:params:xml:ns:netconf:1.0:cnc:cnc-log-table";
+    prefix "cnc-log-table";
+
+    revision "2018-04-01" { // TODO change revision to date of model creation
+        description "Initial revision of CNC model";
+    }
+
+
+    grouping log-entry {
+
+        leaf token_id {
+            type uint32;
+        }
+
+        leaf status {
+            type string;
+        }
+
+        container detail {
+
+            list message {
+
+                leaf time {
+                    type uint32;
+                }
+
+                leaf msg {
+                    type string;
+                }
+            }
+        }
+    }
+
+    container request_table {
+
+        config false;
+
+        list request {
+            key token_id;
+            uses log-entry;
+        }
+    }
+}

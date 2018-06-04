@@ -23,31 +23,6 @@ module cnc-functins {
         prefix status;
     }
 
-    rpc addAllTalkers {
-        input {
-            list talkers {
-                uses talker:GroupTalker;
-            }
-        }
-    }
-
-    rpc addAllListeners {
-        input {
-            list listeners {
-                    uses listener:GroupListener;
-            }
-        }
-    }
-
-    rpc getStreamStatus {
-        output {
-            list status {
-                config false;
-                uses status:GroupStatus;
-            }
-        }
-    }
-
     rpc getExamples {
         output {
             list status {
@@ -63,5 +38,11 @@ module cnc-functins {
                 uses listener:GroupListener;
             }
         }
+    }
+
+    rpc addCNCTestDataToDataStore {
+    }
+
+    rpc removeAllCNCDataFromDataStore {
     }
 }
