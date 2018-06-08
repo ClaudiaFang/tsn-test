@@ -9,7 +9,7 @@ module tsn-domain {
 
     grouping GroupTSNDomain {
         leaf id {
-            type string;
+            type uint16;
         }
 
         leaf name {

@@ -14,7 +14,7 @@ module end-device {
         }
 
         leaf tsn_domain_id {
-            type string;
+            type uint16;
         }
 
         list interface {

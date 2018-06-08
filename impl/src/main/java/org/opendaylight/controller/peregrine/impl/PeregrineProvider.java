@@ -122,6 +122,9 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.opendaylight.controller.peregrine.impl.validators.*;
+
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf._1._0.cnc.cnc.data.rev180401.CncDataData;
 public class PeregrineProvider
         implements CncFunctinsService, AutoCloseable{
 
@@ -171,6 +174,7 @@ public class PeregrineProvider
         // Unregister our MXBean.
         // unregister();
     }
+
 
     @Override
     public Future<RpcResult<GetExamplesOutput>> getExamples(){
@@ -536,14 +540,14 @@ public class PeregrineProvider
 
         output.add( new DomainBuilder()
                 .setName("Domain1")
-                .setKey(new DomainKey("12345"))
-                .setId("12345")
+                .setKey(new DomainKey(12345))
+                .setId(12345)
                 .build());
 
         output.add( new DomainBuilder()
                 .setName("Domain2")
-                .setKey(new DomainKey("12346"))
-                .setId("12346")
+                .setKey(new DomainKey(12346))
+                .setId(12346)
                 .build());
 
         return new TsnDomainsBuilder()

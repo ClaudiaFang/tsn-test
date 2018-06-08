@@ -7,6 +7,11 @@ module cnc-data {
         description "Initial revision of CNC model";
     }
 
+  import ietf-access-control-list {
+    prefix ietf-acl;
+    revision-date 2016-02-18;
+  }
+
     import ieee802-dot1q-cc-base {
         prefix base;
     }
@@ -65,7 +70,7 @@ module cnc-data {
         list tsn_domain {
             key tsn_domain_id;
             leaf tsn_domain_id {
-                type string;
+                type uint16;
             }
             list topology{
                 list edges{

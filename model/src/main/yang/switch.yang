@@ -17,13 +17,13 @@ module switch {
             type string;
         }
 
-        container tsn-domain {
+        container tsn_domain {
 
             leaf id {
-                type string;
+                type uint16;
             }
 
-            leaf as-priority {
+            leaf as_priority {
                 type uint8;
             }
         }
@@ -32,11 +32,11 @@ module switch {
             type string;
         }
 
-        leaf netconf-username {
+        leaf netconf_username {
             type string;
         }
 
-        leaf netconf-password {
+        leaf netconf_password {
             type string;
         }
 

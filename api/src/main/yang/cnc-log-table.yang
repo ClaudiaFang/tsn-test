@@ -14,21 +14,23 @@ module cnc-log-table {
             type uint32;
         }
 
+        leaf input {
+            type string;
+        }
+
         leaf status {
             type string;
         }
 
-        container detail {
 
-            list message {
+        list message {
 
-                leaf time {
-                    type uint32;
-                }
+            leaf time {
+                type uint32;
+            }
 
-                leaf msg {
-                    type string;
-                }
+            leaf msg {
+                type string;
             }
         }
     }
