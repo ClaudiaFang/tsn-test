@@ -39,7 +39,7 @@ public class ValidationConstants {
      */
     public static final DataValidationFailedWithMessageException TSN_DOMAIN_NUMBER_EXCEED =
             new DataValidationFailedWithMessageException(YangInstanceIdentifier.class,
-                    DOMAIN_YII, "The SF referenced in the SF Path does not exist", TSN_DOMAIN_VALIDATION_ERROR);
+                    DOMAIN_YII, "Domain id can not be 0.", TSN_DOMAIN_VALIDATION_ERROR);
 
     /*
      * Futures

@@ -18,13 +18,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
              interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
              odl:type="default" />
 
-  <reference id="dOMDataBroker"
+  <reference id="domDataBroker"
              interface="org.opendaylight.controller.md.sal.dom.api.DOMDataBroker"
              odl:type="default" />
 
   <bean id="peregrine"
-    class="org.opendaylight.controller.peregrine.impl.PeregrineProvider"
-    init-method="init" destroy-method="close">
+        class="org.opendaylight.controller.peregrine.impl.PeregrineProvider"
+        init-method="init"
+        destroy-method="close">
     <property name="dataBroker" ref="dataBroker"/>
   </bean>
 
@@ -35,5 +36,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <bean id="datastoreApi" class="org.opendaylight.controller.peregrine.impl.api.DataStoreAPI">
     <property name="dataProvider" ref="dataBroker" />
+  </bean>
+
+  <bean id="validators"
+        class="org.opendaylight.controller.peregrine.impl.validators.InputValidator"
+        init-method="init"
+        destroy-method="close">
+    <property name="domDataBroker" ref="domDataBroker" />
   </bean>
 </blueprint>
