@@ -1,127 +1,127 @@
 module ieee802-dot1q-cc-listener {
 
-  namespace "urn:ieee:std:802.1Q:yang:ieee802-dot1q-cc:listener";
-  prefix "dot1q-cc";
+    namespace "urn:ieee:std:802.1Q:yang:ieee802-dot1q-cc:listener";
+    prefix "dot1q-cc";
 
-  import ietf-inet-types { prefix "inet"; }
+    import ietf-inet-types { prefix "inet"; }
 
-  import ieee802-dot1q-cc-base { prefix "base"; }
+    import ieee802-dot1q-cc-base { prefix "base"; }
 
-  organization
-    "Institute of Electrical and Electronics Engineers";
+    organization
+        "Institute of Electrical and Electronics Engineers";
 
 
-  contact
-    "WG-URL: http://grouper.ieee.org/groups/802/1/
-    WG-EMail: stds-802-1@ieee.org
-    Contact: IEEE 802.1 Working Group Chair
-    Postal: C/O IEEE 802.1 Working Group
-            IEEE Standards Association
-            445 Hoes Lane
-            P.O. Box 1331
-            Piscataway
-            NJ 08855-1331
-            USA
+    contact
+        "WG-URL: http://grouper.ieee.org/groups/802/1/
+        WG-EMail: stds-802-1@ieee.org
+        Contact: IEEE 802.1 Working Group Chair
+        Postal: C/O IEEE 802.1 Working Group
+                IEEE Standards Association
+                445 Hoes Lane
+                P.O. Box 1331
+                Piscataway
+                NJ 08855-1331
+                USA
 
-    E-mail: STDS-802-1-L@LISTSERV.IEEE.ORG";
+        E-mail: STDS-802-1-L@LISTSERV.IEEE.ORG";
 
-  description
-    "Common typedefs and groupings for TSN user/network configuration
-    in IEEE Std 802.1Q.";
-
-  revision 2018-02-15 {
     description
-      "Initial revision specified in 46.3 of IEEE Std 802.1Qcc-2018,
-      Amendment: Stream Reservation Protocol (SRP) Enhancements
-      and Performance Improvements.";
-    reference
-      "46.3 of IEEE Std 802.1Qcc-2018";
-  }
+        "Common typedefs and groupings for TSN user/network configuration
+        in IEEE Std 802.1Q.";
 
-  grouping GroupListener {
-    description
-      "This YANG grouping specifies:
-      - Listener’s requirements from the network
-      - TSN capabilities of the Listener’s interface(s)
-
-      In the fully centralized model of TSN configuration,
-      this grouping originates from the CUC, and
-      is delivered to the CNC.";
-
-    reference
-      "46.2.4 of IEEE Std 802.1Qcc-2018";
-
-    container StreamID {
+    revision 2018-02-15 {
         description
-        "StreamID specifies a unique identifier
-        of the stream’s configuration, used by protocols in the
-        network to associate the user’s stream with
-        TSN resources.";
-
-        uses base:groupStreamID;
+            "Initial revision specified in 46.3 of IEEE Std 802.1Qcc-2018,
+            Amendment: Stream Reservation Protocol (SRP) Enhancements
+            and Performance Improvements.";
+        reference
+            "46.3 of IEEE Std 802.1Qcc-2018";
     }
 
-    list EndStationInterfaces {
-      key "mac-address interface-name";
-      min-elements 1;
-      description
-        "List of identifiers, one for each physical
-        interface (distinct point of attachment) in
-        the end station acting as a Listener.
+    grouping GroupListener {
+        description
+            "This YANG grouping specifies:
+            - Listener's requirements from the network
+            - TSN capabilities of the Listener's interface(s)
 
-        Although many end stations contain a single interface,
-        this list allows for multiple interfaces. Some TSN
-        features allow a single Stream to span multiple interfaces
-        (e.g. seamless redundancy).
+            In the fully centralized model of TSN configuration,
+            this grouping originates from the CUC, and
+            is delivered to the CNC.";
 
-        Each entry of end-station-interfaces is used by the CNC
-        to locate the Listener in the topology.
+        reference
+            "46.2.4 of IEEE Std 802.1Qcc-2018";
 
-        Since the interface-name leaf is optional, empty string
-        can be used for its key value.";
+        container StreamID {
+            description
+                "StreamID specifies a unique identifier
+                of the stream's configuration, used by protocols in the
+                network to associate the user's stream with
+                TSN resources.";
 
-      reference
-        "46.2.3.3 of IEEE Std 802.1Qcc-2018";
+            uses base:groupStreamID;
+        }
 
-      uses base:group-interface-id;
+        list EndStationInterfaces {
+            key "mac-address interface-name";
+            min-elements 1;
+            description
+                "List of identifiers, one for each physical
+                interface (distinct point of attachment) in
+                the end station acting as a Listener.
+
+                Although many end stations contain a single interface,
+                this list allows for multiple interfaces. Some TSN
+                features allow a single Stream to span multiple interfaces
+                (e.g. seamless redundancy).
+
+                Each entry of end-station-interfaces is used by the CNC
+                to locate the Listener in the topology.
+
+                Since the interface-name leaf is optional, empty string
+                can be used for its key value.";
+
+            reference
+                "46.2.3.3 of IEEE Std 802.1Qcc-2018";
+
+            uses base:group-interface-id;
+        }
+
+        container UserToNetworkRequirements {
+            description
+                "user-to-network-requirements specifies user requirements
+                for the Stream, such as latency and redundancy.
+                The network (CNC) will merge all
+                user-to-network-requirements for a Stream
+                to ensure that all requirements are met.";
+
+            reference
+                "46.2.3.6 of IEEE Std 802.1Qcc-2018";
+
+            uses base:group-user-to-network-requirements;
+        }
+
+        container InterfaceCapabilities {
+            description
+                "interface-capabilities specifies the network
+                capabilities of all interfaces (Ports) contained
+                in end-station-interfaces.
+
+                The network may provide configuration
+                of these capabilities in
+                group-status-talker-listener.interface-configuration.
+
+                NOTE: If an end station contains multiple interfaces
+                with different network capabilities, each interface
+                should be specified as a distinct Talker or
+                Listener (i.e. one entry in end-station-interfaces).
+                Use of multiple entries in end-station-interfaces is intended
+                for network capabilities that span multiple interfaces
+                (e.g. seamless redundancy).";
+
+            reference
+                "46.2.3.7 of IEEE Std 802.1Qcc-2018";
+
+            uses base:group-interface-capabilities;
+        }
     }
-
-    container UserToNetworkRequirements {
-      description
-        "user-to-network-requirements specifies user requirements
-        for the Stream, such as latency and redundancy.
-        The network (CNC) will merge all
-        user-to-network-requirements for a Stream
-        to ensure that all requirements are met.";
-
-      reference
-        "46.2.3.6 of IEEE Std 802.1Qcc-2018";
-
-      uses base:group-user-to-network-requirements;
-    }
-
-    container InterfaceCapabilities {
-      description
-        "interface-capabilities specifies the network
-        capabilities of all interfaces (Ports) contained
-        in end-station-interfaces.
-
-        The network may provide configuration
-        of these capabilities in
-        group-status-talker-listener.interface-configuration.
-
-        NOTE: If an end station contains multiple interfaces
-        with different network capabilities, each interface
-        should be specified as a distinct Talker or
-        Listener (i.e. one entry in end-station-interfaces).
-        Use of multiple entries in end-station-interfaces is intended
-        for network capabilities that span multiple interfaces
-        (e.g. seamless redundancy).";
-
-      reference
-        "46.2.3.7 of IEEE Std 802.1Qcc-2018";
-
-      uses base:group-interface-capabilities;
-    }
-  }
 }
